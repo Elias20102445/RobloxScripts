@@ -1,13 +1,32 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+-- Määritellään funktio, joka asettaa kaikki osat, jotka on nimetty seinäksi, läpinäkyviksi
+local function enableXray()
+    for _, part in pairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            -- Tarkistetaan, että osa on seinä
+            if part.Name == "Seinä" or part.Name == "Wall" then
+                -- Muutetaan seinän läpinäkyvyyttä (materiaali ja läpinäkyvyys)
+                part.Transparency = 0.5  -- Aseta läpinäkyvyys (0 = ei läpinäkyvä, 1 = täysin läpinäkyvä)
+                part.CanCollide = false  -- Estää törmäyksen (jos haluat kävellä sen läpi, poista tämä rivi)
+                part.Material = Enum.Material.SmoothPlastic  -- Voit valita myös muita materiaaleja
+            end
+        end
+    end
+end
 
--- Nosta pelaaja ilmaan
-local bodyVelocity = Instance.new("BodyVelocity")
-bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000) -- Varmistaa, että liike ei ole rajoitettu
-bodyVelocity.Velocity = Vector3.new(0, 50, 0) -- Nousee ylös
-bodyVelocity.Parent = character:WaitForChild("HumanoidRootPart")
+-- Poistetaan X-ray
+local function disableXray()
+    for _, part in pairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
+            if part.Name == "Seinä" or part.Name == "Wall" then
+                -- Palautetaan alkuperäinen läpinäkyvyys ja materiaali
+                part.Transparency = 0  -- Palautetaan läpinäkyvyys normaaliksi
+                part.CanCollide = true  -- Palautetaan törmäys takaisin
+                part.Material = Enum.Material.SmoothPlastic  -- Voit palauttaa alkuperäisen materiaalin
+            end
+        end
+    end
+end
 
--- Poista BodyVelocity, jotta se ei jatkuvasti nosta ilmaan
-wait(2) -- Odotetaan 2 sekuntia ennen poistoa
-bodyVelocity:Destroy()
+-- Kutsutaan funktio
+enableXray()
+
