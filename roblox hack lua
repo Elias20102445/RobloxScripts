@@ -1,32 +1,36 @@
--- Määritellään funktio, joka asettaa kaikki osat, jotka on nimetty seinäksi, läpinäkyviksi
-local function enableXray()
-    for _, part in pairs(workspace:GetDescendants()) do
-        if part:IsA("BasePart") then
-            -- Tarkistetaan, että osa on seinä
-            if part.Name == "Seinä" or part.Name == "Wall" then
-                -- Muutetaan seinän läpinäkyvyyttä (materiaali ja läpinäkyvyys)
-                part.Transparency = 0.5  -- Aseta läpinäkyvyys (0 = ei läpinäkyvä, 1 = täysin läpinäkyvä)
-                part.CanCollide = false  -- Estää törmäyksen (jos haluat kävellä sen läpi, poista tämä rivi)
-                part.Material = Enum.Material.SmoothPlastic  -- Voit valita myös muita materiaaleja
-            end
-        end
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+-- Funktio luo Beam-viivan pelaajan luota
+local function drawBeam(fromPlayer, toPlayer)
+    -- Varmistetaan, että molemmilla pelaajilla on "HumanoidRootPart"
+    if fromPlayer.Character and fromPlayer.Character:FindFirstChild("HumanoidRootPart") and toPlayer.Character and toPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local fromPosition = fromPlayer.Character.HumanoidRootPart.Position
+        local toPosition = toPlayer.Character.HumanoidRootPart.Position
+
+        -- Luodaan Beam (viiva) objekti
+        local beam = Instance.new("Beam")
+        beam.Attachment0 = Instance.new("Attachment", fromPlayer.Character.HumanoidRootPart)
+        beam.Attachment1 = Instance.new("Attachment", toPlayer.Character.HumanoidRootPart)
+        beam.Parent = Workspace
+
+        -- Lisätään värjäys ja ulkonäkö
+        beam.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))  -- Punainen väri
+        beam.Width0 = 0.2
+        beam.Width1 = 0.2
+        beam.LightEmission = 0.5
+
+        -- Poistetaan Beam 5 sekunnin kuluttua
+        game.Debris:AddItem(beam, 5)
     end
 end
 
--- Poistetaan X-ray
-local function disableXray()
-    for _, part in pairs(workspace:GetDescendants()) do
-        if part:IsA("BasePart") then
-            if part.Name == "Seinä" or part.Name == "Wall" then
-                -- Palautetaan alkuperäinen läpinäkyvyys ja materiaali
-                part.Transparency = 0  -- Palautetaan läpinäkyvyys normaaliksi
-                part.CanCollide = true  -- Palautetaan törmäys takaisin
-                part.Material = Enum.Material.SmoothPlastic  -- Voit palauttaa alkuperäisen materiaalin
-            end
+-- Piirrä viivat pelaajien välillä
+RunService.Heartbeat:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            drawBeam(game.Players.LocalPlayer, player)
         end
     end
-end
-
--- Kutsutaan funktio
-enableXray()
-
+end)
