@@ -1,18 +1,13 @@
 local player = game.Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local flying = false
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
--- Odotetaan, että pelaaja ja sen hahmo on ladattu
-player.CharacterAdded:Connect(function(character)
-    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    
-    -- Kun painat E-näppäintä, aloitetaan tai lopetetaan lentäminen
-    UIS.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.KeyCode == Enum.KeyCode.E then
-            flying = not flying  -- Vaihdetaan lentotila päälle/pois
-            if flying then
-                -- Lento alkaa
-                while flying do
-                    humanoidRootPart.Velocity = Vector3.new(0, 50, 0)  -- Nousee ylöspäin
-                    wait(0.1)  --
+-- Nosta pelaaja ilmaan
+local bodyVelocity = Instance.new("BodyVelocity")
+bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000) -- Varmistaa, että liike ei ole rajoitettu
+bodyVelocity.Velocity = Vector3.new(0, 50, 0) -- Nousee ylös
+bodyVelocity.Parent = character:WaitForChild("HumanoidRootPart")
+
+-- Poista BodyVelocity, jotta se ei jatkuvasti nosta ilmaan
+wait(2) -- Odotetaan 2 sekuntia ennen poistoa
+bodyVelocity:Destroy()
